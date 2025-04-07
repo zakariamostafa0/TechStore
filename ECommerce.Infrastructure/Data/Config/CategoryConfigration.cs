@@ -10,6 +10,13 @@ namespace ECommerce.Infrastructure.Data.Config
         {
             builder.Property(c => c.Id).IsRequired();
             builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
+            builder.HasData(
+                new Category
+                {
+                    Id = 1,
+                    Name = "Electronics",
+                    Description = "Devices and gadgets"
+                });
         }
     }
 }
