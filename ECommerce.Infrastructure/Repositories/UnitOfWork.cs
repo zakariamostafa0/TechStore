@@ -1,4 +1,6 @@
-﻿using ECommerce.Core.Interfaces;
+﻿using AutoMapper;
+using ECommerce.Core.Interfaces;
+using ECommerce.Core.Services;
 using ECommerce.Infrastructure.Data;
 
 namespace ECommerce.Infrastructure.Repositories
@@ -6,13 +8,17 @@ namespace ECommerce.Infrastructure.Repositories
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-
-        public UnitOfWork(AppDbContext context)
+        private readonly IMapper _mapper;
+        private readonly IImageManagementService _imageManagementService;
+        public UnitOfWork(AppDbContext context, IMapper mapper, IImageManagementService imageManagementService)
         {
             _context = context;
+            _mapper = mapper;
+            _imageManagementService = imageManagementService;
+            ProductRepository = new ProductRepository(_context, _mapper, _imageManagementService);
             CategoryRepository = new CategoryRepository(_context);
-            ProductRepository = new ProductRepository(_context);
             PhotoRepository = new PhotoRepository(_context);
+
         }
 
         public IProductRepository ProductRepository { get; }

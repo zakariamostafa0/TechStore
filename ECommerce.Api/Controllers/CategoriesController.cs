@@ -1,4 +1,5 @@
-﻿using ECommerce.Core.Interfaces;
+﻿using ECommerce.Api.Helper;
+using ECommerce.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Api.Controllers
@@ -18,12 +19,12 @@ namespace ECommerce.Api.Controllers
             {
                 var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
                 if (categories == null || !categories.Any())
-                    return NotFound("No categories found.");
+                    return NotFound(new ResponseAPI(404, "No categories found."));
                 return Ok(categories);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
         [HttpGet("{id}")]
@@ -33,12 +34,12 @@ namespace ECommerce.Api.Controllers
             {
                 var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
                 if (category == null)
-                    return NotFound($"Category with ID {id} not found.");
+                    return NotFound(new ResponseAPI(404, $"Category with ID {id} not found."));
                 return Ok(category);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
         [HttpPost("add-category")]
@@ -48,11 +49,11 @@ namespace ECommerce.Api.Controllers
             {
                 var category = _mapper.Map<Category>(categoryDto);
                 await _unitOfWork.CategoryRepository.AddAsync(category);
-                return Ok(category);
+                return Created(category.Id.ToString(), new ResponseAPI(201, "Item hase been added!"));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
 
@@ -67,11 +68,11 @@ namespace ECommerce.Api.Controllers
 
                 _mapper.Map(categoryDto, category);
                 await _unitOfWork.CategoryRepository.UpdateAsync(category);
-                return Ok(category);
+                return Ok(new ResponseAPI(200, "Updated succeessfully!"));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
         [HttpDelete("delete-category/{id}")]
@@ -84,11 +85,11 @@ namespace ECommerce.Api.Controllers
                     return NotFound($"Category with ID {id} not found.");
 
                 await _unitOfWork.CategoryRepository.DeleteAsync(id);
-                return Ok($"Category with ID {id} deleted successfully.");
+                return Ok(new ResponseAPI(200, $"Category with ID {id} deleted successfully."));
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+                return BadRequest(new ResponseAPI(400, ex.Message));
             }
         }
     }
