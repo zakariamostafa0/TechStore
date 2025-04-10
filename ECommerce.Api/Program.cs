@@ -1,3 +1,4 @@
+using ECommerce.Api.Middleware;
 using ECommerce.Infrastructure;
 namespace ECommerce.Api
 {
@@ -28,6 +29,9 @@ namespace ECommerce.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
