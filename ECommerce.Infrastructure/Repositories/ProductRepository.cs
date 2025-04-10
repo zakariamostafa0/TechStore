@@ -31,11 +31,24 @@ namespace ECommerce.Infrastructure.Repositories
                 .AsNoTracking()
                 .AsQueryable();
 
+            //filtring by word
+            if (!string.IsNullOrEmpty(productParam.Search))
+            {
+                var searchWords = productParam.Search
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(w => w.ToLower())
+                    .Distinct()
+                    .ToArray();
+
+                query = query.Where(p => searchWords.Any(word =>
+                    p.Name.ToLower().Contains(word.ToLower()) ||
+                    p.Description.ToLower().Contains(word.ToLower())
+                ));
+            }
+
             //filtring by category Id
             if (productParam.CategoryId.HasValue)
-            {
                 query = query.Where(p => p.CategoryId == productParam.CategoryId);
-            }
 
             //filtring by price
             if (!string.IsNullOrEmpty(productParam.Sort))
