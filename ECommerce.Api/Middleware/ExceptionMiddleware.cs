@@ -7,21 +7,29 @@ namespace ECommerce.Api.Middleware
 {
     public class ExceptionMiddleware
     {
+        #region Fields
         private readonly RequestDelegate _next;
         private readonly IHostEnvironment _enviroment;
         private readonly IMemoryCache _memoryCache;
 
         private readonly TimeSpan _rateLimitWindow = TimeSpan.FromSeconds(30);
+        #endregion
+        #region Constractors
         public ExceptionMiddleware(RequestDelegate next, IHostEnvironment enviroment, IMemoryCache memoryCache)
         {
             _next = next;
             _enviroment = enviroment;
             _memoryCache = memoryCache;
         }
+        #endregion
+
+        #region Methods Handling
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
+                ApplySecurity(context);
+
                 if (!IsRequestAllowed(context))
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
@@ -51,6 +59,7 @@ namespace ECommerce.Api.Middleware
             }
         }
 
+        #region Private Methods
         private bool IsRequestAllowed(HttpContext context)
         {
             var ipAddress = context.Connection.RemoteIpAddress.ToString();
@@ -76,5 +85,15 @@ namespace ECommerce.Api.Middleware
             }
             return true;
         }
+
+        private void ApplySecurity(HttpContext context)
+        {
+            context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+            context.Response.Headers.Add("X-Frame-Options", "DENY");
+            context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+        }
+        #endregion
+        #endregion
+
     }
 }
