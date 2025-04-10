@@ -3,6 +3,7 @@ using ECommerce.Core.DTO.Product;
 using ECommerce.Core.Entities.Product;
 using ECommerce.Core.Interfaces;
 using ECommerce.Core.Services;
+using ECommerce.Core.Sharing;
 using ECommerce.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ namespace ECommerce.Infrastructure.Repositories
             _imageManagementService = imageManagementService;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetAllAsync(string sort, int? categoryId)
+        public async Task<IEnumerable<ProductDTO>> GetAllAsync(ProductParam productParam)
         {
             var query = _context.Products
                 .Include(p => p.Category)
@@ -31,21 +32,24 @@ namespace ECommerce.Infrastructure.Repositories
                 .AsQueryable();
 
             //filtring by category Id
-            if (categoryId.HasValue)
+            if (productParam.CategoryId.HasValue)
             {
-                query = query.Where(p => p.CategoryId == categoryId);
+                query = query.Where(p => p.CategoryId == productParam.CategoryId);
             }
 
             //filtring by price
-            if (!string.IsNullOrEmpty(sort))
+            if (!string.IsNullOrEmpty(productParam.Sort))
             {
-                query = sort.ToLower() switch
+                query = productParam.Sort.ToLower() switch
                 {
                     "priceasc" => query.OrderBy(p => p.NewPrice),
                     "pricedesc" => query.OrderByDescending(p => p.NewPrice),
                     _ => query.OrderBy(p => p.Name)
                 };
             }
+            //pagination
+            query = query.Skip((productParam.PageNumber - 1) * productParam.PageSize).Take(productParam.PageSize);
+
             var result = _mapper.Map<List<ProductDTO>>(query); // maby use projection here
 
             return result;
