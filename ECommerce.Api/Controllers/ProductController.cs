@@ -1,5 +1,7 @@
 ﻿using ECommerce.Api.Helper;
+using ECommerce.Core.DTO.Product;
 using ECommerce.Core.Interfaces;
+using ECommerce.Core.Sharing;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.Api.Controllers
@@ -13,18 +15,18 @@ namespace ECommerce.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<IActionResult> GetProducts([FromQuery] ProductParam productParam)
         {
             try
             {
                 var products = await _unitOfWork.ProductRepository
-                    .GetAllAsync(p => p.Category, p => p.Photos);
-                if (products is null || !products.Any())
-                    return NotFound(new ResponseAPI(404, "No products found."));
+                    .GetAllAsync(productParam);
 
-                var result = _mapper.Map<List<ProductDTO>>(products);
-
-                return Ok(result);
+                //if (products == null || !products.Any())
+                //    return Ok(new ResponseAPI(200, "No products found."));
+                var totalCount = await _unitOfWork.ProductRepository.CountsAsync();
+                return Ok(new Pagination<ProductDTO>
+                    (productParam.PageNumber, productParam.PageSize, totalCount, products));
             }
             catch (Exception ex)
             {

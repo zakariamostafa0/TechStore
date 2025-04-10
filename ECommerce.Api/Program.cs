@@ -9,6 +9,21 @@ namespace ECommerce.Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CORSPolicy",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyMethod()
+                            .AllowAnyHeader()
+                            //.AllowCredentials()
+                            .AllowAnyOrigin();
+                        //.WithOrigins("https://localhost:4200");
+                    });
+            });
+
             builder.Services.AddMemoryCache();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,6 +44,7 @@ namespace ECommerce.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("CORSPolicy");
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseStatusCodePagesWithReExecute("/errors/{0}");

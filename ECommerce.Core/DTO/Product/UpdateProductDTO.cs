@@ -1,4 +1,4 @@
-﻿namespace ECommerce.Core.DTO
+﻿namespace ECommerce.Core.DTO.Product
 {
     public record UpdateProductDTO : AddProductDTO
     {

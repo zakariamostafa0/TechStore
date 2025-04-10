@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Api.Mapping
+﻿using ECommerce.Core.DTO.Product;
+
+namespace ECommerce.Api.Mapping
 {
     public class ProductMapping : Profile
     {

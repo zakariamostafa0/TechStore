@@ -1,4 +1,6 @@
-﻿namespace ECommerce.Api.Mapping
+﻿using ECommerce.Core.DTO.Category;
+
+namespace ECommerce.Api.Mapping
 {
     public class CategoryMapping : Profile
     {
