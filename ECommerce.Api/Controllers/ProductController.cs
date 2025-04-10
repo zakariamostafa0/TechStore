@@ -1,4 +1,5 @@
 ﻿using ECommerce.Api.Helper;
+using ECommerce.Core.DTO.Product;
 using ECommerce.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,18 +14,16 @@ namespace ECommerce.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts()
+        public async Task<IActionResult> GetProducts(string sort, int? categoryId)
         {
             try
             {
                 var products = await _unitOfWork.ProductRepository
-                    .GetAllAsync(p => p.Category, p => p.Photos);
-                if (products is null || !products.Any())
-                    return NotFound(new ResponseAPI(404, "No products found."));
+                    .GetAllAsync(sort, categoryId);
 
-                var result = _mapper.Map<List<ProductDTO>>(products);
-
-                return Ok(result);
+                if (products == null || !products.Any())
+                    return Ok(new ResponseAPI(200, "No products found."));
+                return Ok(products);
             }
             catch (Exception ex)
             {

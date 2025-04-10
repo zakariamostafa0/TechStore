@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using ECommerce.Core.DTO;
+using ECommerce.Core.DTO.Product;
 using ECommerce.Core.Entities.Product;
 using ECommerce.Core.Interfaces;
 using ECommerce.Core.Services;
@@ -22,6 +22,34 @@ namespace ECommerce.Infrastructure.Repositories
             _imageManagementService = imageManagementService;
         }
 
+        public async Task<IEnumerable<ProductDTO>> GetAllAsync(string sort, int? categoryId)
+        {
+            var query = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Photos)
+                .AsNoTracking()
+                .AsQueryable();
+
+            //filtring by category Id
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId);
+            }
+
+            //filtring by price
+            if (!string.IsNullOrEmpty(sort))
+            {
+                query = sort.ToLower() switch
+                {
+                    "priceasc" => query.OrderBy(p => p.NewPrice),
+                    "pricedesc" => query.OrderByDescending(p => p.NewPrice),
+                    _ => query.OrderBy(p => p.Name)
+                };
+            }
+            var result = _mapper.Map<List<ProductDTO>>(query); // maby use projection here
+
+            return result;
+        }
         public async Task<bool> AddAsync(AddProductDTO productDTO)
         {
             if (productDTO is null)
@@ -110,5 +138,6 @@ namespace ECommerce.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
     }
 }
